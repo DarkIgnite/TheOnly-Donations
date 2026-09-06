@@ -1,128 +1,92 @@
-# Full configuration explanation in wiki
-# Wiki: https://aglerr.gitbook.io/wiki/theonly-series/the-only-donations
-####################################################################
-# (options)
-#   (useUUID) Should we use UUID when trying to get the player's head skin?
-#             (Recommended set this to 'false' if you're on a cracked server)
-options:
-  useUUID: true
+# ====================================================================
+#              TheOnly-Donations (AvatarDonation)
+#          Konfigurasi Pembelian & Discord Webhook LeftyCraft
+# ====================================================================
 
-# Discord Webhook Notification
-# Sends an embed message to your Discord channel whenever a donation is performed!
+# (options)
+#   (useUUID) Menggunakan UUID saat mengambil skin kepala pemain?
+#             (Set 'false' jika server offline/cracked/bedrock)
+options:
+  useUUID: false
+
+# ====================================================================
+# DISCORD WEBHOOK NOTIFICATION
+# Notifikasi otomatis ke Discord setiap kali transaksi berhasil diproses!
+# ====================================================================
 discordWebhook:
   enabled: true
-  webhookUrl: "YOUR_DISCORD_WEBHOOK_URL_HERE"
-  username: "Donation Alert"
-  avatarUrl: "https://minotar.net/helm/Steve/100.png"
-  content: "" # Optional text message outside embed (e.g. "@everyone New donation!")
+  webhookUrl: "https://discord.com/api/webhooks/1546041139696631849/O6fi2xrEQDxoVykCqFsGqtQZeUahHsaU_jZQkoSDxrx8puuWxXicdRxge-RYhfy057bm"
+  username: "LeftyCraft • Store"
+  avatarUrl: "https://mc-heads.net/avatar/MHF_Chest/100"
+  content: "" # Teks mention (opsional, contoh: "@everyone" atau "<@&ROLE_ID>")
   embed:
     enabled: true
-    title: "🎉 New Donation Received!"
+    title: "✨ NOTIFIKASI PEMBELIAN STORE ✨"
     url: ""
-    description: "**{player}** has just supported the server!"
-    # Color format: Hex (#FFAA00) or name (GOLD, GREEN, RED, BLUE, AQUA, etc.)
-    color: "#FFAA00"
-    # Player head/avatar URL
-    # Placeholders: {player}, {player_uuid}, {player_avatar}
-    # Formats:
-    # - https://mc-heads.net/avatar/{player}/100
-    # - https://minotar.net/helm/{player}/100.png
-    # - https://cravatar.eu/helmavatar/{player}/100.png
+    description: "Pemain **`{player}`** baru saja menyelesaikan pembelian di store!\nTerima kasih banyak telah mendukung server **LeftyCraft**."
+    # Warna default embed jika product tidak memiliki webhookColor khusus:
+    color: "#FFD700"
+    # URL Kepala/Avatar Pemain:
+    # {player} = Nama Player, {player_uuid} = UUID Player
     thumbnailUrl: "https://mc-heads.net/avatar/{player}/100"
-    image: "" # Optional large image URL at the bottom of the embed
+    image: "" # Banner gambar besar di bawah embed (opsional)
     fields:
-      - name: "👤 Donor"
-        value: "```{player}```"
+      - name: "👤 Pembeli"
+        value: "> ```{player}```"
         inline: true
-      - name: "🏷️ Package / Rank"
-        value: "```{product_displayname}```"
+      - name: "📦 Paket / Rank"
+        value: "> ```{product_displayname}```"
         inline: true
-      - name: "💰 Price"
-        value: "```${product_price}```"
+      - name: "💵 Total Pembayaran"
+        value: "> ```Rp {product_price}```"
         inline: true
-      - name: "🎯 Monthly Goal"
-        value: "${goal_current_donation} / ${goal_donation_goal} ({goal_percentage}%)"
+      - name: "ℹ️ Informasi Server"
+        value: "Ketik `/store` atau `/ranks` di in-game untuk info rank, upgrade rank, dan rewards!"
         inline: false
     footer:
-      text: "Thank you for supporting our server! • TheOnly-Donations"
-      iconUrl: ""
+      text: "LeftyCraft • Store Notification"
+      iconUrl: "https://mc-heads.net/avatar/MHF_Heart/100"
     timestamp: true
 
-# Configuration Explanation
-# (donationsMessage)
-#   (messageWithAvatar)
-#     (enabled) Should we use avatar images when donation is broadcasted?
-#     (messages)
-#       (header....footer) Messages that will appear when donation is being broadcasted
-#   (messageWithoutAvatar)
-#     (messages) Messages that will appear when donation is being broadcasted
-#                 in condition if the (messageWithAvatar) is disabled.
-#                 You can add as many lines as you want.
-#
-# Are you interested in using hex color? Check the wiki for example!
-# Link: https://aglerr.gitbook.io/wiki/theonly-series/the-only-donations/plugins-files#example-usage
-
-# You can make the donation goal always appear as a BossBar
+# ====================================================================
+# BOSSBAR GOAL
+# ====================================================================
 bossbar:
-  enabled: true # Enable this to use this feature
-  # There are 3 Placeholder which is,
-  # {current} is to show the current donation
-  # {goal} is to show how much is the donation goal, you can see it at donationGoal:
-  # {percentage} You can see what is the percentage at the Donation Goal
-  title: "Current Donation Goal {current}/{goal}"
-  color: "GREEN" # Color: BLUE, GREEN, PINK, PURPLE, RED, WHITE, YELLOW
-  style: "SEGMENTED_10" # Segment: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+  enabled: false
+  # Placeholders: {current}, {goal}, {percentage}
+  title: "Target Bulan Ini: Rp{current}/Rp{goal} ({percentage}%)"
+  color: "GREEN" # BLUE, GREEN, PINK, PURPLE, RED, WHITE, YELLOW
+  style: "SEGMENTED_10" # SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
 
+# ====================================================================
+# PESAN BROADCAST IN-GAME (8 Baris Bersih & Pas di Samping Avatar)
+# ====================================================================
 donationsMessage:
   messageWithAvatar:
-    enabled: true
+    enabled: true # Menampilkan kepala pemain di chat. Panjang teks sudah disesuaikan agar pas 1 baris
     messages:
-      header: "&6&m--------------------------------------------"
-      line1: " &6» &l{player} &ejust donated!"
-      line2: " &6» Store: &7store.example.com"
-      line3: ""
-      line4: " &6&lMONTHLY GOAL &7(${goal_current_donation}/${goal_donation_goal})"
-      line5: " {goal_progress_bar} &7{goal_percentage}%"
-      line6: ""
-      line7: " &6Product: {product_displayname} &7(${product_price})"
-      line8: " &7(( Help us keep the server alive! ))"
-      footer: "&6&m--------------------------------------------"
+      header: "&6&m----------------------------------------"
+      line1: " &e&l{player}"
+      line2: " &6» &7Beli: &a{product_displayname}"
+      line3: " &6» &7Total: &fRp {product_price}"
+      line4: ""
+      line5: " &eTerima kasih atas dukungannya!"
+      line6: " &7LeftyCraft makin berkembang."
+      line7: ""
+      line8: " &6Store: &e/store &7| &6Info: &e/ranks"
+      footer: "&6&m----------------------------------------"
   messageWithoutAvatar:
     messages:
-      - ""
-      - " &6» &l{player} &7just donated!"
-      - " &6» Store: &7store.example.com"
-      - ""
-      - " &6&lMONTHLY GOAL &7(${goal_current_donation}/${goal_donation_goal})"
-      - " {goal_progress_bar} &7{goal_percentage}%"
-      - ""
-      - " &6Product: {product_displayname} &7(${product_price})"
-      - ""
-      - " &7(( Help us keep the server alive! ))"
+      - "&6&m--------------------------------------------"
+      - " &6» &l{player} &ebaru saja membeli &a&l{product_displayname}&e!"
+      - " &6» Toko: &e/store &7atau &e/ranks"
+      - " &6» Total: &aRp {product_price}"
+      - " &7Terima kasih atas dukungannya untuk LeftyCraft!"
+      - "&6&m--------------------------------------------"
 
-
-# Configuration Explanation
-# (events) List of events that will be played on donation perform
-#   (effect) This event will give everyone a list of potions effects
-#     (enabled) Should we enabled this event?
-#     (effects) The list of potions effects that will be given to all players online
-#               Format: POTION;AMPLIFIER;(DURATION (in seconds))
-#               List of PotionEffectType https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/potion/PotionEffectType.html
-#   (sound) The list of sounds that will be played upon donation
-#           Format: SOUND_NAME;VOLUME;PITCH
-#           List of Sounds: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
-#   (titleBar) This event will send everyone a title bar message
-#     (enabled) Should we enabled this event?
-#     (title) The title of the title bar
-#     (subTitle) The sub title of the title bar
-#     (fadeIn) How long should the fade-in animation played? (in ticks - 20 ticks = 1 second)
-#     (stay) How long should the title bar displayed? (in ticks - 20 ticks = 1 second)
-#     (fadeOut) Howlong should the fade-out animation played? (in ticks - 20 ticks = 1 second)
-#   (command) This event will executed a command from console
-#     (enabled) Should we enabled this event?
-#     (commands) A list of commands that will get executed
-#                Available Placeholders:
-#                - {player} - return the donor's name
+# ====================================================================
+# EFEK & REWARD SAAT PEMBELIAN BERHASIL
+# ====================================================================
 events:
   effect:
     enabled: true
@@ -134,65 +98,61 @@ events:
   sounds:
     - "ENTITY_PLAYER_LEVELUP;1.0;1.0"
     - "BLOCK_LAVA_POP;1.0;1.0"
+    - "UI_TOAST_CHALLENGE_COMPLETE;1.0;1.2"
   titleBar:
     enabled: true
-    title: "&e&l{player} just donated!"
-    subTitle: "&fEveryone will receive special effects!"
+    title: "&e&l{player} &fbaru saja membeli &a&l{product_displayname}&f!"
+    subTitle: "&aSemua pemain online mendapatkan efek & 1x Kunci Legendary!"
     fadeIn: 20
     stay: 60
     fadeOut: 20
+  # Kembang api (Fireworks) di lokasi pembeli saat transaksi sukses
+  fireworks:
+    enabled: true
+    amount: 4 # Jumlah kembang api
+    delay: 6 # Jarak tick antar kembang api (20 ticks = 1 detik)
+    types:
+      - "BALL"
+      - "BURST"
+      - "STAR"
+    colors:
+      - "#FFAA00"
+      - "#FFD700"
+      - "#00FF88"
+      - "#00D2FF"
+      - "#B300FF"
   command:
     enabled: true
     commands:
-      - "broadcast &aThanks {player} for the donation, everyone will receive a key!"
-      - "crazycrates giveall virtual vote 5"
+      - "broadcast &e&l{player} &fbaru saja membeli rank &a&l{product_displayname}&f &6&l(/ranks)&f, semua pemain mendapatkan &a1x Kunci Legendary&f!"
+      - "crate key giveall legendary 1"
 
-# Configuration Explanation
-# (donationGoal)
-#   (enabled) Should we enable donation goal module?
-#   (donationGoal) How much is the donation goal?
-#   (progressBar)
-#     (barLength) How long is the progress bar?
-#     (symbol) The symbol that will be used for the progress bar (Recommended: '|' or '█')
-#     (completedColor) What is the completed color for the progress bar
-#     (notCompletedColor) What is the un-completed color for the progress bar
-#       Available Colors:
-#       - AQUA
-#       - BLACK
-#       - BLUE
-#       - DARK_AQUA
-#       - DARK_BLUE
-#       - DARK_GRAY
-#       - DARK_GREEN
-#       - DARK_PURPLE
-#       - DARK_RED
-#       - GOLD
-#       - GRAY
-#       - GREEN
-#       - LIGHT_PURPLE
-#       - RED
-#       - WHITE
-#       - YELLOW
+# ====================================================================
+# TARGET BULANAN (GOAL)
+# ====================================================================
 donationGoal:
-  enabled: true
-  donationGoal: 500
+  enabled: false
+  donationGoal: 1500000
   progressBar:
     barLength: 15
     symbol: '█'
     completedColor: GREEN
     notCompletedColor: RED
   commandsOnReach:
-    - "broadcast &aWe have reached the donation goal!"
+    - "broadcast &aTarget bulanan server telah tercapai! Terima kasih semuanya!"
 
+# ====================================================================
+# PESAN SISTEM & PERINTAH
+# ====================================================================
 messages:
-  noPermission: "&cYou don't have enough permissions!"
-  reload: "&aYou have reloaded the configuration"
-  invalidProduct: "&cThere is no product with that name"
-  performDonation: "&aYou have perform a donation for &e{player}"
-  reset: "&aYou have resetted the Current Donation"
+  noPermission: "&cAnda tidak memiliki izin untuk menggunakan perintah ini!"
+  reload: "&aKonfigurasi plugin berhasil dimuat ulang (reloaded)!"
+  invalidProduct: "&cProduk atau paket rank dengan nama tersebut tidak ditemukan!"
+  performDonation: "&aBerhasil memproses pembelian untuk pemain &e{player}&a!"
+  reset: "&aTotal target berhasil direset!"
   help:
-    - "&e&lDonations Help &7- by aglerr"
-    - "&e- /donations help &7- send this messages"
-    - "&e- /donations reload &7- reload the configuration"
-    - "&e- /donations reset &7- reset the current donation &c(EXPERIMENTAL)"
-    - "&e- /donations send <player> <product> &7- perform a donation task in the server"
+    - "&6&l=== BANTUAN STORE (THEONLY-DONATIONS) ==="
+    - "&e- /donations help &7- Menampilkan daftar bantuan ini"
+    - "&e- /donations reload &7- Memuat ulang file konfigurasi"
+    - "&e- /donations reset &7- Mereset total transaksi saat ini"
+    - "&e- /donations send <player> <product> &7- Memberikan paket kepada pemain"
