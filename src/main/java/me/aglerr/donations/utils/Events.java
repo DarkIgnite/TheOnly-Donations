@@ -26,7 +26,7 @@ public class Events {
         eventEffects();
         eventSound();
         eventTitleBar(player, product);
-        eventCommand(player);
+        eventCommand(player, product);
         eventFireworks(player);
     }
 
@@ -133,14 +133,27 @@ public class Events {
         });
     }
 
-    public static void eventCommand(OfflinePlayer offlinePlayer){
+    public static void eventCommand(OfflinePlayer offlinePlayer, Product product){
         FileConfiguration config = DonationPlugin.DEFAULT_CONFIG.getConfig();
         // Return if the command event is disabled
         if(!config.getBoolean("events.command.enabled")) return;
+
+        String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : "";
+        String productName = product != null ? product.getName() : "";
+        String productDisplayName = product != null ? product.getDisplayName() : "";
+        String productPrice = product != null ? Utils.formatPrice(product.getPrice()) : "";
+
         // Loop through all the commands
         config.getStringList("events.command.commands").forEach(command ->
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
-                        .replace("{player}", offlinePlayer.getName() != null ? offlinePlayer.getName() : "")));
+                        .replace("{player}", playerName)
+                        .replace("{product_name}", productName)
+                        .replace("{product_displayname}", productDisplayName)
+                        .replace("{product_price}", productPrice)));
+    }
+
+    public static void eventCommand(OfflinePlayer offlinePlayer) {
+        eventCommand(offlinePlayer, null);
     }
 
     public static void eventFireworks(OfflinePlayer offlinePlayer) {
@@ -154,7 +167,7 @@ public class Events {
             return;
         }
 
-        int amount = config.getInt("events.fireworks.amount", 3);
+        int amount = config.getInt("events.fireworks.amount", 4);
         int delay = config.getInt("events.fireworks.delay", 6);
         List<String> colorHexes = config.getStringList("events.fireworks.colors");
         List<String> types = config.getStringList("events.fireworks.types");

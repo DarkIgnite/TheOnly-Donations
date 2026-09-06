@@ -101,7 +101,11 @@ public class DonationPlugin extends JavaPlugin {
     }
 
     public static SkinsRestorer getSkinsApi() {
-        return SkinsRestorerProvider.get();
+        try {
+            return SkinsRestorerProvider.get();
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     public ProductManager getProductManager() {

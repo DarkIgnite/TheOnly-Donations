@@ -12,7 +12,6 @@ import me.aglerr.donations.managers.DependencyManager;
 import me.aglerr.donations.objects.QueueDonation;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.skinsrestorer.api.SkinsRestorer;
-import net.skinsrestorer.api.SkinsRestorerProvider;
 import net.skinsrestorer.api.property.SkinIdentifier;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,10 +19,12 @@ import org.bukkit.OfflinePlayer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -53,81 +54,98 @@ public class Utils {
     }
 
     public static String getMinepicURL(OfflinePlayer player) {
-        String url = "https://minepic.org/avatar/";
-        // Check if SkinsRestorer is enabled
+        String name = player.getName() != null ? player.getName() : "Steve";
+        // Handle Bedrock / Floodgate player names (prefixed with . or *)
+        String cleanName = name.startsWith(".") || name.startsWith("*") ? name.substring(1) : name;
+
         if (DependencyManager.SKINS_RESTORER_ENABLED) {
-            // Get the SkinsRestorerAPI
-            SkinsRestorer api = DonationPlugin.getSkinsApi();
-            Optional<SkinIdentifier> optional = api.getPlayerStorage().getSkinIdOfPlayer(player.getUniqueId());
-            // If the player is wearing skin, get the skin name
-            url = url + (optional.isPresent() ? optional.get().getIdentifier() : player.getName());
-        } else {
-            // Code if the server doesn't use skins restorer
-            url = url + (ConfigValue.USE_UUID ? player.getUniqueId().toString() : player.getName());
+            try {
+                SkinsRestorer api = DonationPlugin.getSkinsApi();
+                if (api != null && api.getPlayerStorage() != null) {
+                    Optional<SkinIdentifier> optional = api.getPlayerStorage().getSkinIdOfPlayer(player.getUniqueId());
+                    if (optional.isPresent()) {
+                        return "https://mc-heads.net/avatar/" + optional.get().getIdentifier() + "/100";
+                    }
+                }
+            } catch (Throwable ignored) {
+                // SkinsRestorer API not ready or proxy mode without database
+            }
         }
-        return url + "/8";
+
+        if (ConfigValue.USE_UUID && player.getUniqueId() != null) {
+            return "https://mc-heads.net/avatar/" + player.getUniqueId() + "/100";
+        }
+        return "https://mc-heads.net/avatar/" + cleanName + "/100";
     }
 
     /**
      * Note: this method should be run in async
      */
     public static void broadcastDonation(QueueDonation donation) {
+        // If avatar broadcast is disabled, immediately broadcast without avatar
+        if (!ConfigValue.BROADCAST_AVATAR_ENABLED) {
+            broadcastNoAvatar(donation);
+            return;
+        }
+
         BufferedImage image = null;
 
         try {
-            // Get the URL
             URL url = new URL(getMinepicURL(donation.getPlayer()));
-            // Get the buffered image from the url
-            image = ImageIO.read(url);
-        } catch (IOException e) {
-            Logger.info("Couldn't get player Image");
-            e.printStackTrace();
-
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(3000);
+            try (InputStream in = conn.getInputStream()) {
+                image = ImageIO.read(in);
+            }
+        } catch (Throwable e) {
             try {
                 URL fallbackUrl = new URL("https://minotar.net/helm/Steve/100.png");
-                image = ImageIO.read(fallbackUrl);
-            } catch (IOException ex) {
-                Logger.info("Couldn't get the steve Image");
-                ex.printStackTrace();
-                return;
-            }
-
+                HttpURLConnection conn = (HttpURLConnection) fallbackUrl.openConnection();
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                try (InputStream in = conn.getInputStream()) {
+                    image = ImageIO.read(in);
+                }
+            } catch (Throwable ignored) {}
         }
-        // Check if broadcast avatar is enabled
-        if(ConfigValue.BROADCAST_AVATAR_ENABLED){
-            // Check if hex color is enabled
-            if(DonationPlugin.HEX_AVAILABLE){
-                // Create an image message with hex color
+
+        // If downloading image failed completely (e.g. offline server, no internet), fallback to no-avatar broadcast
+        if (image == null) {
+            broadcastNoAvatar(donation);
+            return;
+        }
+
+        try {
+            if (DonationPlugin.HEX_AVAILABLE) {
                 ImageMessageHex imageMessageHex = new ImageMessageHex(image, 8, ImageChar.BLOCK.getChar())
-                        // Append the additional text
                         .appendText(ConfigValue.donationAvatar(donation));
-                // Finally broadcast the messages
                 imageMessageHex.sendToPlayers();
             } else {
-                // Now, we do the code if the hex color isn't available
                 ImageMessage imageMessage = new ImageMessage(image, 8, ImageChar.BLOCK.getChar())
-                        // Append the additional text
                         .appendText(ConfigValue.donationAvatar(donation));
-                // Finally broadcast the message
                 imageMessage.sendToPlayers();
             }
-        } else {
-            //---------------------------------------------
-            // Code when avatar message is disabled
-            //---------------------------------------------
-            // Check if the hex color is enabled
-            if(DonationPlugin.HEX_AVAILABLE){
-                // First, loop through all online players
-                Bukkit.getOnlinePlayers().forEach(player ->
-                        // Now, loop through all the messages
-                        ConfigValue.donationNoAvatar(donation).forEach(message ->
-                                // Finally send the messages
-                                player.spigot().sendMessage(new TextComponent(Common.color(message)))));
-            } else {
-                // Broadcast the message without hex color and not centered
-                ConfigValue.donationNoAvatar(donation).forEach(message ->
-                        Bukkit.broadcastMessage(Common.color(message)));
+        } catch (Throwable t) {
+            // Fallback on any rendering error
+            broadcastNoAvatar(donation);
+        }
+    }
+
+    public static void broadcastNoAvatar(QueueDonation donation) {
+        try {
+            List<String> messages = ConfigValue.donationNoAvatar(donation);
+            for (String message : messages) {
+                if (message == null || message.isEmpty()) {
+                    Bukkit.broadcastMessage("");
+                    continue;
+                }
+                Bukkit.broadcastMessage(Common.color(message));
             }
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
     }
 
