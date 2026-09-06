@@ -1,7 +1,7 @@
 # TheOnly-Donations (AvatarDonation) - Forked Edition 🚀
 
 > **Forked from:** [mdaffa48/TheOnly-Donations](https://github.com/mdaffa48/TheOnly-Donations)  
-> **Version:** `4.0.4-FORKED`  
+> **Version:** `4.0.4-FORKED-Update-5`  
 > **Platform:** Spigot / Paper / Purpur (1.16 - 1.21+)  
 > **Java:** 21  
 
