@@ -3,26 +3,35 @@ package me.aglerr.donations.utils;
 import com.muhammaddaffa.mdlib.utils.Common;
 import com.muhammaddaffa.mdlib.xseries.XSound;
 import me.aglerr.donations.DonationPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
+import me.aglerr.donations.objects.Product;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public class Events {
 
     private static final DonationPlugin plugin = JavaPlugin.getPlugin(DonationPlugin.class);
 
-    public static void playAllEvents(OfflinePlayer player){
+    public static void playAllEvents(OfflinePlayer player, Product product){
         eventEffects();
         eventSound();
-        eventTitleBar(player);
+        eventTitleBar(player, product);
         eventCommand(player);
+        eventFireworks(player);
+    }
+
+    public static void playAllEvents(OfflinePlayer player){
+        playAllEvents(player, null);
     }
 
     public static void eventEffects(){
@@ -86,25 +95,40 @@ public class Events {
         });
     }
 
-    public static void eventTitleBar(OfflinePlayer offlinePlayer){
+    public static void eventTitleBar(OfflinePlayer offlinePlayer, Product product){
         FileConfiguration config = DonationPlugin.DEFAULT_CONFIG.getConfig();
         // Return if the title bar event is disabled
         if(!config.getBoolean("events.titleBar.enabled")) return;
+
+        String titleRaw = config.getString("events.titleBar.title", "");
+        String subTitleRaw = config.getString("events.titleBar.subTitle", "");
+
+        String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : "Unknown";
+        String productName = product != null ? product.getName() : "";
+        String productDisplayName = product != null ? product.getDisplayName() : "";
+        String productPrice = product != null ? Utils.formatPrice(product.getPrice()) : "";
+
         // Get the title
-        String title = Common.color(config.getString("events.titleBar.title")
-                .replace("{player}", offlinePlayer.getName()));
+        String title = Common.color(titleRaw
+                .replace("{player}", playerName)
+                .replace("{product_name}", productName)
+                .replace("{product_displayname}", productDisplayName)
+                .replace("{product_price}", productPrice));
+
         // Get the subtitle
-        String subTitle = Common.color(config.getString("events.titleBar.subTitle")
-                .replace("{player}", offlinePlayer.getName()));
-        // Get the fade in animation duration
-        int fadeIn = config.getInt("events.titleBar.fadeIn");
-        // Get the stay duration
-        int stay = config.getInt("events.titleBar.stay");
-        // Get the fade out animation duration
-        int fadeOut = config.getInt("events.titleBar.fadeOut");
+        String subTitle = Common.color(subTitleRaw
+                .replace("{player}", playerName)
+                .replace("{product_name}", productName)
+                .replace("{product_displayname}", productDisplayName)
+                .replace("{product_price}", productPrice));
+
+        // Get animations duration
+        int fadeIn = config.getInt("events.titleBar.fadeIn", 20);
+        int stay = config.getInt("events.titleBar.stay", 60);
+        int fadeOut = config.getInt("events.titleBar.fadeOut", 20);
+
         // Loop through all online players
         Bukkit.getOnlinePlayers().forEach(player -> {
-            // Send the title bar messages
             Common.sendTitle(player, title, subTitle, fadeIn, stay, fadeOut);
         });
     }
@@ -116,7 +140,81 @@ public class Events {
         // Loop through all the commands
         config.getStringList("events.command.commands").forEach(command ->
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command
-                        .replace("{player}", offlinePlayer.getName())));
+                        .replace("{player}", offlinePlayer.getName() != null ? offlinePlayer.getName() : "")));
+    }
+
+    public static void eventFireworks(OfflinePlayer offlinePlayer) {
+        FileConfiguration config = DonationPlugin.DEFAULT_CONFIG.getConfig();
+        if (!config.getBoolean("events.fireworks.enabled", true)) {
+            return;
+        }
+
+        Player player = offlinePlayer.getPlayer();
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+
+        int amount = config.getInt("events.fireworks.amount", 3);
+        int delay = config.getInt("events.fireworks.delay", 6);
+        List<String> colorHexes = config.getStringList("events.fireworks.colors");
+        List<String> types = config.getStringList("events.fireworks.types");
+
+        List<Color> colors = new ArrayList<>();
+        if (colorHexes.isEmpty()) {
+            colors.add(Color.ORANGE);
+            colors.add(Color.YELLOW);
+            colors.add(Color.AQUA);
+            colors.add(Color.FUCHSIA);
+            colors.add(Color.LIME);
+        } else {
+            for (String hex : colorHexes) {
+                try {
+                    java.awt.Color awtColor = java.awt.Color.decode(hex.trim());
+                    colors.add(Color.fromRGB(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue()));
+                } catch (Exception ignored) {
+                    colors.add(Color.ORANGE);
+                }
+            }
+        }
+
+        Random random = new Random();
+        for (int i = 0; i < amount; i++) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (!player.isOnline()) return;
+
+                Location loc = player.getLocation().clone().add(
+                        (random.nextDouble() - 0.5) * 2.0,
+                        0.5,
+                        (random.nextDouble() - 0.5) * 2.0
+                );
+
+                Firework firework = player.getWorld().spawn(loc, Firework.class);
+                FireworkMeta meta = firework.getFireworkMeta();
+
+                FireworkEffect.Type type = FireworkEffect.Type.BALL;
+                if (!types.isEmpty()) {
+                    try {
+                        String typeName = types.get(random.nextInt(types.size()));
+                        type = FireworkEffect.Type.valueOf(typeName.toUpperCase());
+                    } catch (Exception ignored) {}
+                }
+
+                Color primary = colors.get(random.nextInt(colors.size()));
+                Color secondary = colors.get(random.nextInt(colors.size()));
+
+                FireworkEffect effect = FireworkEffect.builder()
+                        .with(type)
+                        .withColor(primary)
+                        .withFade(secondary, Color.WHITE)
+                        .flicker(true)
+                        .trail(true)
+                        .build();
+
+                meta.addEffect(effect);
+                meta.setPower(1);
+                firework.setFireworkMeta(meta);
+            }, (long) i * delay);
+        }
     }
 
 }

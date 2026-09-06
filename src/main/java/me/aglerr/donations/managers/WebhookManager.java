@@ -60,7 +60,10 @@ public class WebhookManager {
                     embed.setDescription(parseText(ConfigValue.WEBHOOK_EMBED_DESCRIPTION, player, product));
                 }
 
-                int color = parseColor(ConfigValue.WEBHOOK_EMBED_COLOR);
+                // Dynamic color per product if configured, otherwise fallback to config default
+                String colorStr = (product.getWebhookColor() != null && !product.getWebhookColor().trim().isEmpty()) ?
+                        product.getWebhookColor() : ConfigValue.WEBHOOK_EMBED_COLOR;
+                int color = parseColor(colorStr);
                 embed.setColor(color);
 
                 if (ConfigValue.WEBHOOK_EMBED_THUMBNAIL != null && !ConfigValue.WEBHOOK_EMBED_THUMBNAIL.isEmpty()) {
@@ -171,6 +174,7 @@ public class WebhookManager {
                 case "DARK_BLUE":
                     return 0x0000AA;
                 case "AQUA":
+                case "CYAN":
                     return 0x55FFFF;
                 case "DARK_AQUA":
                     return 0x00AAAA;

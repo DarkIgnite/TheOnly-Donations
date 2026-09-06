@@ -2,11 +2,9 @@ package me.aglerr.donations.objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Product {
 
@@ -14,12 +12,18 @@ public class Product {
     private final String displayName;
     private final double price;
     private final List<String> command;
+    private final String webhookColor;
 
-    public Product(String name, String displayName, double price, List<String> command) {
+    public Product(String name, String displayName, double price, List<String> command, @Nullable String webhookColor) {
         this.name = name;
         this.displayName = displayName;
         this.price = price;
         this.command = command;
+        this.webhookColor = webhookColor;
+    }
+
+    public Product(String name, String displayName, double price, List<String> command) {
+        this(name, displayName, price, command, null);
     }
 
     public String getName() {
@@ -36,6 +40,11 @@ public class Product {
 
     public List<String> getCommand() {
         return command;
+    }
+
+    @Nullable
+    public String getWebhookColor() {
+        return webhookColor;
     }
 
     public void execute(OfflinePlayer player) {

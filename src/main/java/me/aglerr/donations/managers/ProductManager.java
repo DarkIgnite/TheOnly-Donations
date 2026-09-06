@@ -3,8 +3,6 @@ package me.aglerr.donations.managers;
 import com.muhammaddaffa.mdlib.utils.Logger;
 import me.aglerr.donations.DonationPlugin;
 import me.aglerr.donations.objects.Product;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +83,8 @@ public class ProductManager {
             errors.add(basePath + ".command is missing or empty (must be a list of commands)");
         }
 
+        String webhookColor = section.getString("webhookColor", section.getString("color", null));
+
         // If errors exist, print them and SKIP loading this product
         if (!errors.isEmpty()) {
             Logger.info("&cFailed to load product '" + id + "':");
@@ -95,7 +95,7 @@ public class ProductManager {
         }
 
         // Safe to load now
-        Product product = new Product(id, displayName, price, commandList);
+        Product product = new Product(id, displayName, price, commandList, webhookColor);
         this.productList.put(id, product);
         Logger.info("Successfully loaded '" + id + "'");
     }

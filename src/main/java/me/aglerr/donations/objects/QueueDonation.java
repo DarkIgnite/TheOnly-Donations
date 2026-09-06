@@ -29,7 +29,7 @@ public class QueueDonation {
     }
 
     public void announceDonation(){
-        Executor.sync(() -> Events.playAllEvents(this.getPlayer()));
+        Executor.sync(() -> Events.playAllEvents(this.getPlayer(), this.getProduct()));
         Executor.sync(() -> DonationGoal.handleDonation(this.getProduct()));
         Executor.async(() -> Utils.broadcastDonation(this));
         Executor.async(() -> WebhookManager.sendDonationWebhook(this));
