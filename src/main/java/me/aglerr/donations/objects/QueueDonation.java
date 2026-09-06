@@ -2,6 +2,7 @@ package me.aglerr.donations.objects;
 
 import com.muhammaddaffa.mdlib.utils.Executor;
 import me.aglerr.donations.managers.DonationGoal;
+import me.aglerr.donations.managers.WebhookManager;
 import me.aglerr.donations.utils.Events;
 import me.aglerr.donations.utils.Utils;
 import org.bukkit.OfflinePlayer;
@@ -31,5 +32,6 @@ public class QueueDonation {
         Executor.sync(() -> Events.playAllEvents(this.getPlayer()));
         Executor.sync(() -> DonationGoal.handleDonation(this.getProduct()));
         Executor.async(() -> Utils.broadcastDonation(this));
+        Executor.async(() -> WebhookManager.sendDonationWebhook(this));
     }
 }

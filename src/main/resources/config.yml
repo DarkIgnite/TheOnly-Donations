@@ -7,6 +7,47 @@
 options:
   useUUID: true
 
+# Discord Webhook Notification
+# Sends an embed message to your Discord channel whenever a donation is performed!
+discordWebhook:
+  enabled: true
+  webhookUrl: "YOUR_DISCORD_WEBHOOK_URL_HERE"
+  username: "Donation Alert"
+  avatarUrl: "https://minotar.net/helm/Steve/100.png"
+  content: "" # Optional text message outside embed (e.g. "@everyone New donation!")
+  embed:
+    enabled: true
+    title: "🎉 New Donation Received!"
+    url: ""
+    description: "**{player}** has just supported the server!"
+    # Color format: Hex (#FFAA00) or name (GOLD, GREEN, RED, BLUE, AQUA, etc.)
+    color: "#FFAA00"
+    # Player head/avatar URL
+    # Placeholders: {player}, {player_uuid}, {player_avatar}
+    # Formats:
+    # - https://mc-heads.net/avatar/{player}/100
+    # - https://minotar.net/helm/{player}/100.png
+    # - https://cravatar.eu/helmavatar/{player}/100.png
+    thumbnailUrl: "https://mc-heads.net/avatar/{player}/100"
+    image: "" # Optional large image URL at the bottom of the embed
+    fields:
+      - name: "👤 Donor"
+        value: "```{player}```"
+        inline: true
+      - name: "🏷️ Package / Rank"
+        value: "```{product_displayname}```"
+        inline: true
+      - name: "💰 Price"
+        value: "```${product_price}```"
+        inline: true
+      - name: "🎯 Monthly Goal"
+        value: "${goal_current_donation} / ${goal_donation_goal} ({goal_percentage}%)"
+        inline: false
+    footer:
+      text: "Thank you for supporting our server! • TheOnly-Donations"
+      iconUrl: ""
+    timestamp: true
+
 # Configuration Explanation
 # (donationsMessage)
 #   (messageWithAvatar)

@@ -14,6 +14,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigValue {
 
@@ -46,6 +47,23 @@ public class ConfigValue {
     public static String PROGRESS_BOSSBAR_TITLE;
     public static String PROGRESS_BOSSBAR_COLOR;
     public static String PROGRESS_BOSSBAR_STYLE;
+
+    public static boolean WEBHOOK_ENABLED;
+    public static String WEBHOOK_URL;
+    public static String WEBHOOK_USERNAME;
+    public static String WEBHOOK_AVATAR_URL;
+    public static String WEBHOOK_CONTENT;
+    public static boolean WEBHOOK_EMBED_ENABLED;
+    public static String WEBHOOK_EMBED_TITLE;
+    public static String WEBHOOK_EMBED_URL;
+    public static String WEBHOOK_EMBED_DESCRIPTION;
+    public static String WEBHOOK_EMBED_COLOR;
+    public static String WEBHOOK_EMBED_THUMBNAIL;
+    public static String WEBHOOK_EMBED_IMAGE;
+    public static String WEBHOOK_EMBED_FOOTER_TEXT;
+    public static String WEBHOOK_EMBED_FOOTER_ICON;
+    public static boolean WEBHOOK_EMBED_TIMESTAMP;
+    public static List<Map<?, ?>> WEBHOOK_EMBED_FIELDS;
 
     public static String NO_PERMISSION;
     public static String RELOAD;
@@ -84,6 +102,23 @@ public class ConfigValue {
         PROGRESS_BOSSBAR_TITLE = config.getString("bossbar.title");
         PROGRESS_BOSSBAR_COLOR = config.getString("bossbar.color");
         PROGRESS_BOSSBAR_STYLE = config.getString("bossbar.style");
+
+        WEBHOOK_ENABLED = config.getBoolean("discordWebhook.enabled", false);
+        WEBHOOK_URL = config.getString("discordWebhook.webhookUrl", "");
+        WEBHOOK_USERNAME = config.getString("discordWebhook.username", "Donation Alert");
+        WEBHOOK_AVATAR_URL = config.getString("discordWebhook.avatarUrl", "");
+        WEBHOOK_CONTENT = config.getString("discordWebhook.content", "");
+        WEBHOOK_EMBED_ENABLED = config.getBoolean("discordWebhook.embed.enabled", true);
+        WEBHOOK_EMBED_TITLE = config.getString("discordWebhook.embed.title", "🎉 New Server Donation!");
+        WEBHOOK_EMBED_URL = config.getString("discordWebhook.embed.url", "");
+        WEBHOOK_EMBED_DESCRIPTION = config.getString("discordWebhook.embed.description", "**{player}** has just supported the server!");
+        WEBHOOK_EMBED_COLOR = config.getString("discordWebhook.embed.color", "#FFAA00");
+        WEBHOOK_EMBED_THUMBNAIL = config.getString("discordWebhook.embed.thumbnailUrl", "https://mc-heads.net/avatar/{player}/100");
+        WEBHOOK_EMBED_IMAGE = config.getString("discordWebhook.embed.image", "");
+        WEBHOOK_EMBED_FOOTER_TEXT = config.getString("discordWebhook.embed.footer.text", "Thank you for supporting our server!");
+        WEBHOOK_EMBED_FOOTER_ICON = config.getString("discordWebhook.embed.footer.iconUrl", "");
+        WEBHOOK_EMBED_TIMESTAMP = config.getBoolean("discordWebhook.embed.timestamp", true);
+        WEBHOOK_EMBED_FIELDS = config.getMapList("discordWebhook.embed.fields");
     }
 
     private static String getColor(String colorName) {
