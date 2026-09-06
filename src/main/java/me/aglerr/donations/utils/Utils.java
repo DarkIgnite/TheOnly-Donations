@@ -22,6 +22,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import java.util.Optional;
 
 public class Utils {
@@ -136,5 +139,17 @@ public class Utils {
                 Strings.repeat(Common.color(notCompletedColor) + symbol, totalBars - progressBars);
     }
 
+    public static String formatPrice(double price) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("id", "ID"));
+        symbols.setGroupingSeparator('.');
+        symbols.setDecimalSeparator(',');
+        DecimalFormat df;
+        if (price == (long) price) {
+            df = new DecimalFormat("#,###", symbols);
+        } else {
+            df = new DecimalFormat("#,###.##", symbols);
+        }
+        return df.format(price);
+    }
 
 }

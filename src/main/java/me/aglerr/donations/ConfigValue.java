@@ -5,6 +5,7 @@ import me.aglerr.donations.managers.DependencyManager;
 import me.aglerr.donations.managers.DonationGoal;
 import me.aglerr.donations.objects.Product;
 import me.aglerr.donations.objects.QueueDonation;
+import me.aglerr.donations.utils.Utils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
@@ -178,7 +179,8 @@ public class ConfigValue {
         return string
                 .replace("{product_name}", product.getName())
                 .replace("{product_displayname}", product.getDisplayName())
-                .replace("{product_price}", product.getPrice() + "")
+                .replace("{product_price}", Utils.formatPrice(product.getPrice()))
+                .replace("{product_price_raw}", String.valueOf(product.getPrice()))
                 .replace("{player}", player.getName())
                 .replace("{goal_progress_bar}", DonationGoal.getProgressBar())
                 .replace("{goal_percentage}", DonationGoal.getDonationPercentage())
