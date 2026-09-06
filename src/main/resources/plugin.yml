@@ -1,7 +1,7 @@
 name: AvatarDonation
 version: '${project.version}'
 api-version: 1.13
-authors: [aglerr, starfruit2210]
+authors: [aglerr, starfruit2210, DarkIgnite]
 main: me.aglerr.donations.DonationPlugin
 softdepend:
   - SkinsRestorer
