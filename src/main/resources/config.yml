@@ -99,13 +99,14 @@ events:
     - "ENTITY_PLAYER_LEVELUP;1.0;1.0"
     - "BLOCK_LAVA_POP;1.0;1.0"
     - "UI_TOAST_CHALLENGE_COMPLETE;1.0;1.2"
+  # Tampilan Layar Judul (Title Screen) Ringkas & Pas di Layar
   titleBar:
     enabled: true
-    title: "&e&l{player} &fbaru saja membeli &a&l{product_displayname}&f!"
-    subTitle: "&aSemua pemain online mendapatkan efek & 1x Kunci Legendary!"
-    fadeIn: 20
-    stay: 60
-    fadeOut: 20
+    title: "&e&l{player}"
+    subTitle: "&fMembeli &a{product_displayname}&f! &e(+1 Key)"
+    fadeIn: 15
+    stay: 50
+    fadeOut: 15
   # Kembang api (Fireworks) di lokasi pembeli saat transaksi sukses
   fireworks:
     enabled: true
